@@ -12,7 +12,7 @@ lab.experiment('Subdomain plugin', function () {
 
   lab.test('should load correctly', async () => {
 
-    const server = Hapi.Server({ });
+    const server = Hapi.Server({});
 
     await server.register([{
       plugin: subdomain,
@@ -54,7 +54,7 @@ lab.experiment('Subdomain plugin', function () {
     server.route({
       method: 'GET',
       path: '/',
-      handler: function(request) {
+      handler: function (request) {
         return 'ok';
       }
     })
@@ -99,6 +99,36 @@ lab.experiment('Subdomain plugin', function () {
 
   })
 
+  lab.test('should work when stripping trailing slash', async () => {
+    const server = Hapi.Server({
+      host: 'example.com',
+      router: {
+        stripTrailingSlash: true
+      }
+    });
+
+    await server.register([{
+      plugin: subdomain,
+      options: {
+        exclude: ['www'],
+        destination: '/tenant'
+      }
+    }]);
+
+    server.route({
+      method: 'GET',
+      path: '/tenant/{tenant}',
+      handler: async (request) => {
+        return request.params.tenant;
+      }
+    })
+
+    const res = await server.inject('http://acme.example.com');
+    expect(res.statusCode).to.equal(200);
+    expect(res.result).to.contain('acme');
+
+  });
+
   lab.test('should route even complex paths', async () => {
 
     const server = Hapi.Server({ host: 'example.com' });
@@ -108,7 +138,7 @@ lab.experiment('Subdomain plugin', function () {
       path: '/tenant/{tenant}/example',
       handler: async (request) => {
 
-        return {tenant: request.params.tenant, query: request.query.foo};
+        return { tenant: request.params.tenant, query: request.query.foo };
 
       }
     })
@@ -150,10 +180,10 @@ lab.experiment('Subdomain plugin', function () {
       }
     }]);
 
-    const res = await server.inject({ 
+    const res = await server.inject({
       url: 'http://acme.example.com/',
       method: 'POST',
-      payload:'{"foo": "bar"}'
+      payload: '{"foo": "bar"}'
     });
     expect(res.statusCode).to.equal(200);
     expect(res.result).to.equal('bar');

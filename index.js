@@ -20,7 +20,14 @@ async function register (server, options) {
 
     if (subdomain && !Hoek.contain(options.exclude, subdomain)) {
       
-      const targetPath = options.destination + '/' + subdomain + request.url.path;
+      // $lab:coverage:off$
+      const urlPath = request.url.path || request.url.pathname;
+      // $lab:coverage:on$
+      let targetPath = options.destination + '/' + subdomain + urlPath;
+      if(request.server.settings.router.stripTrailingSlash && targetPath.substring(targetPath.length-1,targetPath.length)==='/')
+      {
+        targetPath = targetPath.substring(0,targetPath.length-1);
+      }
       request.setUrl(targetPath);
 
     }

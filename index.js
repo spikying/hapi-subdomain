@@ -28,6 +28,7 @@ async function register (server, options) {
       {
         targetPath = targetPath.substring(0,targetPath.length-1);
       }
+      request.isSubdomain = true;
       request.setUrl(targetPath);
 
     }
